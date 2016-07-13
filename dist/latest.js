@@ -169,14 +169,20 @@ var Reactions = {
   customer: {
     id: null,
     initialize: function initialize() {
-      i = Reactions.cookies.get('reaction_customer_id');
+      var i = Reactions.cookies.get('reaction_customer_id');
       if (!i) {
         i = 'getnew()';
         Reactions.cookies.set('reaction_customer_id', i);
       }
       Reactions.customer.id = i;
     },
-    createID: function createID() {}
+    createID: function createID() {
+      Reactions.ajaxGet('http://trippyporn.com/videos/dildo-fun.json').then(JSON.parse).then(function (r) {
+        console.log(r);
+      }).catch(function (error) {
+        console.log(error);
+      });
+    }
   },
 
   ui: {
@@ -196,11 +202,31 @@ var Reactions = {
     xhr.send(encodeURI("name=" + reaction + "&referrer=" + window.location.hostname));
   },
 
+
   cookies: Cookies.noConflict(),
 
   track: {
     impression: function impression() {}
-  }
+  },
 
+  ajaxGet: function ajaxGet(url) {
+    return new Promise(function (resolve, reject) {
+      var req = new XMLHttpRequest();
+      req.open("GET", url);
+      req.onload = function () {
+        if (req.status === 200) {
+          resolve(req.response);
+        } else {
+          reject(new Error(req.statusText));
+        }
+      };
+
+      req.onerror = function () {
+        reject(new Error("Network error"));
+      };
+
+      req.send();
+    });
+  }
 };
 //# sourceMappingURL=latest.js.map
