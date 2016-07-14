@@ -7,33 +7,46 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   hook.innerHTML = Reactions.ui.render();
 
-  Reactions.initialize();
+  Reactions.socket.on_open = function(data) {
+  
+    console.log('Connection has been established: ', data);
+  
+    Reactions.init();
 
-  Reactions.track.impression();
+    Reactions.track.impression();
+
+  }
 
 });
 
-var Reactions = {
+const Reactions = {
 
-  initialize: function() {
-    Reactions.customer.initialize();
+  init() {
+    //Reactions.customer.init();
+
+    Reactions.r = Reactions.do(
+      'customer.create', {
+        some: 'thing'
+      }, 
+      (r) => { // Success
+        console.log(`success ${r}`);
+      }, 
+      (r) => { // Fail
+        console.log(`fail ${r}`);
+      }
+    );
+
   },
 
   customer: {
     id: null,
-    initialize() {
-      let i = Reactions.cookies.get('reaction_customer_id');
+    init() {
+      let i = Reactions.cookies.get('reaction_sid');
       if(!i) {
-        i = 'getnew()';
-        Reactions.cookies.set('reaction_customer_id', i);
+        
+        Reactions.cookies.set('reaction_sid', i);
       }
       Reactions.customer.id = i;
-    },
-    createID() {
-      Reactions.ajaxGet('http://trippyporn.com/videos/dildo-fun.json')
-        .then(JSON.parse)
-        .then((r) => { console.log(r); })
-        .catch(function(error) { console.log(error) });
     }
   },
 
@@ -43,17 +56,6 @@ var Reactions = {
     }
   },
 
-  send(reaction) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', encodeURI('http://reactions-backend.vertaxe.com/create-reaction'));
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    //xhr.onload = function() {
-    //  console.log(xhr.status);
-    //  console.log(xhr.responseText);
-    //};
-    xhr.send(encodeURI(`name=${reaction}&referrer=${window.location.hostname}`));
-  },
-
   cookies: Cookies.noConflict(),
 
   track: {
@@ -61,6 +63,9 @@ var Reactions = {
 
     }
   },
-  dispatcher: new WebSocketRails('localhost:3000/websocket')
+  socket: new WebSocketRails('localhost:3000/websocket'),
+  do(action,data,success,fail) {
+    Reactions.socket.trigger(action,data,success,fail);
+  } 
 
 }

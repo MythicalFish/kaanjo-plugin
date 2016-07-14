@@ -156,33 +156,41 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
   hook.innerHTML = Reactions.ui.render();
 
-  Reactions.initialize();
+  Reactions.socket.on_open = function (data) {
 
-  Reactions.track.impression();
+    console.log('Connection has been established: ', data);
+
+    Reactions.init();
+
+    Reactions.track.impression();
+  };
 });
 
 var Reactions = {
+  init: function init() {
+    //Reactions.customer.init();
 
-  initialize: function initialize() {
-    Reactions.customer.initialize();
+    Reactions.r = Reactions.do('customer.create', {
+      some: 'thing'
+    }, function (r) {
+      // Success
+      console.log("success " + r);
+    }, function (r) {
+      // Fail
+      console.log("fail " + r);
+    });
   },
+
 
   customer: {
     id: null,
-    initialize: function initialize() {
-      var i = Reactions.cookies.get('reaction_customer_id');
+    init: function init() {
+      var i = Reactions.cookies.get('reaction_sid');
       if (!i) {
-        i = 'getnew()';
-        Reactions.cookies.set('reaction_customer_id', i);
+
+        Reactions.cookies.set('reaction_sid', i);
       }
       Reactions.customer.id = i;
-    },
-    createID: function createID() {
-      Reactions.ajaxGet('http://trippyporn.com/videos/dildo-fun.json').then(JSON.parse).then(function (r) {
-        console.log(r);
-      }).catch(function (error) {
-        console.log(error);
-      });
     }
   },
 
@@ -192,24 +200,14 @@ var Reactions = {
     }
   },
 
-  send: function send(reaction) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', encodeURI('http://reactions-backend.vertaxe.com/create-reaction'));
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    //xhr.onload = function() {
-    //  console.log(xhr.status);
-    //  console.log(xhr.responseText);
-    //};
-    xhr.send(encodeURI("name=" + reaction + "&referrer=" + window.location.hostname));
-  },
-
-
   cookies: Cookies.noConflict(),
 
   track: {
     impression: function impression() {}
   },
-  dispatcher: new WebSocketRails('localhost:3000/websocket')
-
+  socket: new WebSocketRails('localhost:3000/websocket'),
+  do: function _do(action, data, success, fail) {
+    Reactions.socket.trigger(action, data, success, fail);
+  }
 };
 //# sourceMappingURL=latest.js.map
