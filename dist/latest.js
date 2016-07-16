@@ -148,50 +148,45 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 "use strict";
 
-document.addEventListener("DOMContentLoaded", function (event) {
-
-  var hook = document.getElementById("reactions");
-
-  if (hook.length < 1) return;
-
-  hook.innerHTML = Reactions.ui.render();
+document.addEventListener("DOMContentLoaded", function () {
 
   Reactions.socket.on_open = function (data) {
-
     console.log('Connection has been established: ', data);
-
     Reactions.init();
-
-    Reactions.track.impression();
   };
 });
 
 var Reactions = {
   init: function init() {
-    //Reactions.customer.init();
 
-    Reactions.r = Reactions.do('customer.create', {
-      some: 'thing'
-    }, function (r) {
-      // Success
-      console.log("success " + r);
-    }, function (r) {
-      // Fail
-      console.log("fail " + r);
+    var hook = document.getElementById("reactions");
+
+    if (Reactions.valid(hook)) return false;
+
+    Reactions.customer.init(function () {
+      Reactions.product.init();
     });
   },
 
 
   customer: {
-    id: null,
-    init: function init() {
-      var i = Reactions.cookies.get('reaction_sid');
-      if (!i) {
-
-        Reactions.cookies.set('reaction_sid', i);
+    init: function init(cb) {
+      //Reactions.customer.id = Reactions.cookies.get('reactions_sid');
+      Reactions.customer.id = false;
+      if (!Reactions.customer.id) {
+        Reactions.request('customer.create', {}, function (success) {
+          Reactions.customer.id = success.sid;
+          Reactions.cookies.set('reactions_sid', success.sid);
+          cb();
+        }, function (fail) {
+          console.log("Failed to create customer: " + fail.error);
+        });
       }
-      Reactions.customer.id = i;
     }
+  },
+
+  product: {
+    init: function init(cb) {}
   },
 
   ui: {
@@ -206,8 +201,47 @@ var Reactions = {
     impression: function impression() {}
   },
   socket: new WebSocketRails('localhost:3000/websocket'),
-  do: function _do(action, data, success, fail) {
+  request: function request(action, data, success, fail) {
     Reactions.socket.trigger(action, data, success, fail);
+  },
+  valid: function valid(hook) {
+
+    var is_valid = true;
+    var required_attributes = ['data-productID'];
+
+    if (hook.length < 1) {
+      is_valid = false;
+    } else {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = required_attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var attribute = _step.value;
+
+          if (!hook.hasAttribute(attribute)) {
+            console.error("Reactions error: You are missing the '" + attribute + "' attribute in your HTML.");
+            is_valid = false;
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
+    return is_valid;
   }
 };
 //# sourceMappingURL=latest.js.map

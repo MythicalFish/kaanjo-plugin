@@ -1,20 +1,8 @@
-document.addEventListener("DOMContentLoaded", function(event) { 
+document.addEventListener("DOMContentLoaded", () => { 
   
-  var hook = document.getElementById("reactions");
-
-  if(hook.length < 1)
-    return;
-
-  hook.innerHTML = Reactions.ui.render();
-
   Reactions.socket.on_open = function(data) {
-  
     console.log('Connection has been established: ', data);
-  
     Reactions.init();
-
-    Reactions.track.impression();
-
   }
 
 });
@@ -22,31 +10,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
 const Reactions = {
 
   init() {
-    //Reactions.customer.init();
+    
+    let hook = document.getElementById("reactions");
 
-    Reactions.r = Reactions.do(
-      'customer.create', {
-        some: 'thing'
-      }, 
-      (r) => { // Success
-        console.log(`success ${r}`);
-      }, 
-      (r) => { // Fail
-        console.log(`fail ${r}`);
-      }
-    );
+    if(Reactions.valid(hook))
+      return false;
+
+    Reactions.customer.init(() => {
+      Reactions.product.init();
+    });
+
+    
 
   },
 
   customer: {
-    id: null,
-    init() {
-      let i = Reactions.cookies.get('reaction_sid');
-      if(!i) {
-        
-        Reactions.cookies.set('reaction_sid', i);
+    init(cb) {
+      //Reactions.customer.id = Reactions.cookies.get('reactions_sid');
+      Reactions.customer.id = false;
+      if(!Reactions.customer.id) {
+        Reactions.request( 'customer.create', {}, 
+          (success) => { 
+            Reactions.customer.id = success.sid;
+            Reactions.cookies.set('reactions_sid', success.sid);
+            cb();
+          }, 
+          (fail) => { console.log(`Failed to create customer: ${fail.error}`); }
+        );
       }
-      Reactions.customer.id = i;
+    }
+  },
+
+  product: {
+    init(cb) {
+
     }
   },
 
@@ -64,8 +61,28 @@ const Reactions = {
     }
   },
   socket: new WebSocketRails('localhost:3000/websocket'),
-  do(action,data,success,fail) {
+  request(action,data,success,fail) {
     Reactions.socket.trigger(action,data,success,fail);
-  } 
+  },
+
+  valid(hook) {
+
+    let is_valid = true;
+    let required_attributes = ['data-productID'];
+
+    if(hook.length < 1) {
+      is_valid = false;
+    } else {
+      for(let attribute of required_attributes) {
+        if(!hook.hasAttribute(attribute)) {
+          console.error(`Reactions error: You are missing the '${attribute}' attribute in your HTML.`);
+          is_valid = false;
+        }
+      }
+    }
+
+    return is_valid;
+
+  }
 
 }
