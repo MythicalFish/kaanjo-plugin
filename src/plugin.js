@@ -37,13 +37,20 @@ const Reactions = {
           }, 
           (fail) => { console.log(`Failed to create customer: ${fail.error}`); }
         );
+      } else {
+        cb();
       }
     }
   },
 
   product: {
     init(cb) {
-
+      Reactions.request( 'product.find', {}, 
+        (success) => { 
+          cb();
+        }, 
+        (fail) => { console.log(`Failed to find product: ${fail.error}`); }
+      );
     }
   },
 
@@ -68,12 +75,11 @@ const Reactions = {
   valid(hook) {
 
     let is_valid = true;
-    let required_attributes = ['data-productID'];
 
     if(hook.length < 1) {
       is_valid = false;
     } else {
-      for(let attribute of required_attributes) {
+      for(const attribute of Reactions.attributes.required) {
         if(!hook.hasAttribute(attribute)) {
           console.error(`Reactions error: You are missing the '${attribute}' attribute in your HTML.`);
           is_valid = false;
@@ -83,6 +89,11 @@ const Reactions = {
 
     return is_valid;
 
+  },
+
+  attributes: {
+    required: ['data-productID'],
+    values: {}
   }
 
 }

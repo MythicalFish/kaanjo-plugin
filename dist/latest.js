@@ -181,12 +181,20 @@ var Reactions = {
         }, function (fail) {
           console.log("Failed to create customer: " + fail.error);
         });
+      } else {
+        cb();
       }
     }
   },
 
   product: {
-    init: function init(cb) {}
+    init: function init(cb) {
+      Reactions.request('product.find', {}, function (success) {
+        cb();
+      }, function (fail) {
+        console.log("Failed to find product: " + fail.error);
+      });
+    }
   },
 
   ui: {
@@ -207,7 +215,6 @@ var Reactions = {
   valid: function valid(hook) {
 
     var is_valid = true;
-    var required_attributes = ['data-productID'];
 
     if (hook.length < 1) {
       is_valid = false;
@@ -217,7 +224,7 @@ var Reactions = {
       var _iteratorError = undefined;
 
       try {
-        for (var _iterator = required_attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (var _iterator = Reactions.attributes.required[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var attribute = _step.value;
 
           if (!hook.hasAttribute(attribute)) {
@@ -242,6 +249,13 @@ var Reactions = {
     }
 
     return is_valid;
+  },
+
+
+  attributes: {
+    required: ['data-productID'],
+    values: {}
   }
+
 };
 //# sourceMappingURL=latest.js.map
