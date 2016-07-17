@@ -22,7 +22,9 @@ const Reactions = {
 
     Reactions.webmaster.init(() => {
       Reactions.customer.init(() => {
-        Reactions.product.init();
+        Reactions.product.init(() => {
+
+        });
       });
     });
     
@@ -67,13 +69,16 @@ const Reactions = {
   product: {
     init(cb) {
       Reactions.request( 'product.find', {
-        id: Reactions.attributes.id,
+        product_name: Reactions.attributes.name,
         customer_id: Reactions.customer.id
       }, 
-        (success) => { 
+        (success) => {
+          Reactions.product.data = success.data;
+          console.log(`Found product: ${Reactions.attributes.name}`);
+          console.log(success.data);
           cb();
         }, 
-        (fail) => { console.log(`Failed to find product: ${Reactions.attributes.id}`); }
+        (fail) => { console.log(`Failed to find product: ${Reactions.attributes.name}`); }
       );
     }
   },
@@ -120,7 +125,7 @@ const Reactions = {
   },
 
   attributes: {
-    id: null
+    name: null
   }
 
 }

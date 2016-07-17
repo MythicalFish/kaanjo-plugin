@@ -169,7 +169,7 @@ var Reactions = {
 
     Reactions.webmaster.init(function () {
       Reactions.customer.init(function () {
-        Reactions.product.init();
+        Reactions.product.init(function () {});
       });
     });
   },
@@ -210,12 +210,15 @@ var Reactions = {
   product: {
     init: function init(cb) {
       Reactions.request('product.find', {
-        id: Reactions.attributes.id,
+        product_name: Reactions.attributes.name,
         customer_id: Reactions.customer.id
       }, function (success) {
+        Reactions.product.data = success.data;
+        console.log("Found product: " + Reactions.attributes.name);
+        console.log(success.data);
         cb();
       }, function (fail) {
-        console.log("Failed to find product: " + Reactions.attributes.id);
+        console.log("Failed to find product: " + Reactions.attributes.name);
       });
     }
   },
@@ -257,7 +260,7 @@ var Reactions = {
 
 
   attributes: {
-    id: null
+    name: null
   }
 
 };
