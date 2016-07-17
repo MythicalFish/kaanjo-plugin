@@ -163,25 +163,45 @@ var Reactions = {
 
     if (!Reactions.valid(hook)) return false;
 
-    Reactions.customer.init(function () {
-      Reactions.product.init();
+    for (var attribute in Reactions.attributes) {
+      Reactions.attributes[attribute] = hook.getAttribute("data-" + attribute);
+    }
+
+    Reactions.webmaster.init(function () {
+      Reactions.customer.init(function () {
+        Reactions.product.init();
+      });
     });
   },
 
 
+  webmaster: {
+    init: function init(cb) {
+      Reactions.request('webmaster.find', {
+        website: window.location.host
+      }, function (success) {
+        console.log("Found webmaster for: " + window.location.host);
+        cb();
+      }, function (fail) {
+        console.log("Failed to find webmaster for current host: " + window.location.host);
+      });
+    }
+  },
+
   customer: {
     init: function init(cb) {
-      //Reactions.customer.id = Reactions.cookies.get('reactions_sid');
-      Reactions.customer.id = false;
+      Reactions.customer.id = Reactions.cookies.get('reactions_sid');
       if (!Reactions.customer.id) {
         Reactions.request('customer.create', {}, function (success) {
           Reactions.customer.id = success.sid;
           Reactions.cookies.set('reactions_sid', success.sid);
+          console.log("Created customer with ID: " + success.id);
           cb();
         }, function (fail) {
           console.log("Failed to create customer: " + fail.error);
         });
       } else {
+        console.log("Found cookie for customer: " + Reactions.customer.id);
         cb();
       }
     }
@@ -190,11 +210,12 @@ var Reactions = {
   product: {
     init: function init(cb) {
       Reactions.request('product.find', {
-        id: Reactions.attributes.id
+        id: Reactions.attributes.id,
+        customer_id: Reactions.customer.id
       }, function (success) {
         cb();
       }, function (fail) {
-        console.log("Failed to find product: " + fail.error);
+        console.log("Failed to find product: " + Reactions.attributes.id);
       });
     }
   },
@@ -227,8 +248,6 @@ var Reactions = {
         if (!hook.hasAttribute("data-" + attribute)) {
           console.error("Reactions error: You are missing the '" + attribute + "' attribute in your HTML.");
           is_valid = false;
-        } else {
-          Reactions.attributes[attribute] = hook.getAttribute("data-" + attribute);
         }
       }
     }

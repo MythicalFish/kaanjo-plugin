@@ -16,28 +16,49 @@ const Reactions = {
     if(!Reactions.valid(hook))
       return false;
 
-    Reactions.customer.init(() => {
-      Reactions.product.init();
-    });
+    for(const attribute in Reactions.attributes) {
+      Reactions.attributes[attribute] = hook.getAttribute(`data-${attribute}`);
+    }
 
+    Reactions.webmaster.init(() => {
+      Reactions.customer.init(() => {
+        Reactions.product.init();
+      });
+    });
     
 
   },
 
+  webmaster: {
+    init(cb) {
+      Reactions.request( 'webmaster.find', 
+        {
+          website: window.location.host 
+        }, 
+        (success) => { 
+          console.log(`Found webmaster for: ${window.location.host}`)
+          cb();
+        }, 
+        (fail) => { console.log(`Failed to find webmaster for current host: ${window.location.host}`); }
+      );
+    }
+  },
+
   customer: {
     init(cb) {
-      //Reactions.customer.id = Reactions.cookies.get('reactions_sid');
-      Reactions.customer.id = false;
+      Reactions.customer.id = Reactions.cookies.get('reactions_sid');
       if(!Reactions.customer.id) {
         Reactions.request( 'customer.create', {}, 
           (success) => { 
             Reactions.customer.id = success.sid;
             Reactions.cookies.set('reactions_sid', success.sid);
+            console.log(`Created customer with ID: ${success.id}`)
             cb();
           }, 
           (fail) => { console.log(`Failed to create customer: ${fail.error}`); }
         );
       } else {
+        console.log(`Found cookie for customer: ${Reactions.customer.id}`)
         cb();
       }
     }
@@ -46,12 +67,13 @@ const Reactions = {
   product: {
     init(cb) {
       Reactions.request( 'product.find', {
-        id: Reactions.attributes.id
+        id: Reactions.attributes.id,
+        customer_id: Reactions.customer.id
       }, 
         (success) => { 
           cb();
         }, 
-        (fail) => { console.log(`Failed to find product: ${fail.error}`); }
+        (fail) => { console.log(`Failed to find product: ${Reactions.attributes.id}`); }
       );
     }
   },
@@ -88,9 +110,7 @@ const Reactions = {
         if(!hook.hasAttribute(`data-${attribute}`)) {
           console.error(`Reactions error: You are missing the '${attribute}' attribute in your HTML.`);
           is_valid = false;
-        } else {
-          Reactions.attributes[attribute] = hook.getAttribute(`data-${attribute}`);
-        }
+        } 
 
       }
     }
