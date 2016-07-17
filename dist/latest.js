@@ -161,7 +161,7 @@ var Reactions = {
 
     var hook = document.getElementById("reactions");
 
-    if (Reactions.valid(hook)) return false;
+    if (!Reactions.valid(hook)) return false;
 
     Reactions.customer.init(function () {
       Reactions.product.init();
@@ -189,7 +189,9 @@ var Reactions = {
 
   product: {
     init: function init(cb) {
-      Reactions.request('product.find', {}, function (success) {
+      Reactions.request('product.find', {
+        id: Reactions.attributes.id
+      }, function (success) {
         cb();
       }, function (fail) {
         console.log("Failed to find product: " + fail.error);
@@ -219,31 +221,14 @@ var Reactions = {
     if (hook.length < 1) {
       is_valid = false;
     } else {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
 
-      try {
-        for (var _iterator = Reactions.attributes.required[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var attribute = _step.value;
+      for (var attribute in Reactions.attributes) {
 
-          if (!hook.hasAttribute(attribute)) {
-            console.error("Reactions error: You are missing the '" + attribute + "' attribute in your HTML.");
-            is_valid = false;
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
+        if (!hook.hasAttribute("data-" + attribute)) {
+          console.error("Reactions error: You are missing the '" + attribute + "' attribute in your HTML.");
+          is_valid = false;
+        } else {
+          Reactions.attributes[attribute] = hook.getAttribute("data-" + attribute);
         }
       }
     }
@@ -253,8 +238,7 @@ var Reactions = {
 
 
   attributes: {
-    required: ['data-productID'],
-    values: {}
+    id: null
   }
 
 };

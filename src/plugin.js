@@ -13,7 +13,7 @@ const Reactions = {
     
     let hook = document.getElementById("reactions");
 
-    if(Reactions.valid(hook))
+    if(!Reactions.valid(hook))
       return false;
 
     Reactions.customer.init(() => {
@@ -45,7 +45,9 @@ const Reactions = {
 
   product: {
     init(cb) {
-      Reactions.request( 'product.find', {}, 
+      Reactions.request( 'product.find', {
+        id: Reactions.attributes.id
+      }, 
         (success) => { 
           cb();
         }, 
@@ -78,12 +80,18 @@ const Reactions = {
 
     if(hook.length < 1) {
       is_valid = false;
+
     } else {
-      for(const attribute of Reactions.attributes.required) {
-        if(!hook.hasAttribute(attribute)) {
+
+      for(const attribute in Reactions.attributes) {
+
+        if(!hook.hasAttribute(`data-${attribute}`)) {
           console.error(`Reactions error: You are missing the '${attribute}' attribute in your HTML.`);
           is_valid = false;
+        } else {
+          Reactions.attributes[attribute] = hook.getAttribute(`data-${attribute}`);
         }
+
       }
     }
 
@@ -92,8 +100,7 @@ const Reactions = {
   },
 
   attributes: {
-    required: ['data-productID'],
-    values: {}
+    id: null
   }
 
 }
