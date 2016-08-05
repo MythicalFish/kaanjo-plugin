@@ -24,9 +24,10 @@ const Kaanjo = {
 
     Kaanjo.webmaster.init(() => {
       Kaanjo.customer.init(() => {
-        Kaanjo.request('customer.impress')
         Kaanjo.product.init(() => {
-
+          Kaanjo.request('customer.impress', {
+            device: detectBrowser(navigator.userAgent).name
+          },(success) => {console.log('Recorded impression')})
         })
       })
     })
@@ -63,8 +64,16 @@ const Kaanjo = {
           (fail) => { console.log(`Failed to create customer: ${fail.error}`); }
         );
       } else {
-        console.log(`Found cookie for customer: ${Kaanjo.customer.id}`)
-        cb();
+        Kaanjo.request( 'customer.find', {
+          id: Kaanjo.customer.id
+        },
+        (success) => {
+          console.log(`Found & initialized cookie for customer: ${Kaanjo.customer.id}`)
+          cb()
+        },
+        (fail) => {
+          console.log(`Failed to initialize customer: ${Kaanjo.customer.id}`)
+        })
       }
     }
   },

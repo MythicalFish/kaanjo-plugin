@@ -14,6 +14,7 @@ const source = {
   js: [
     'src/websocket_rails.0.0.1.min.js',
     'node_modules/js-cookie/src/js.cookie.js',
+    'src/detect-browser.js',
     'src/plugin.js'
   ]
 }
