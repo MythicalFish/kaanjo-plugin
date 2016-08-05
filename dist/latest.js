@@ -150,26 +150,26 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  Reactions.socket.on_open = function (data) {
-    console.log('Connection has been established: ', data);
-    Reactions.init();
+  Kaanjo.socket.on_open = function (data) {
+    console.log("Connection established: " + data.connection_id);
+    Kaanjo.init();
   };
 });
 
-var Reactions = {
+var Kaanjo = {
   init: function init() {
 
-    var hook = document.getElementById("reactions");
+    var hook = document.getElementById("kaanjo");
 
-    if (!Reactions.valid(hook)) return false;
+    if (!Kaanjo.valid(hook)) return false;
 
-    for (var attribute in Reactions.attributes) {
-      Reactions.attributes[attribute] = hook.getAttribute("data-" + attribute);
+    for (var attribute in Kaanjo.attributes) {
+      Kaanjo.attributes[attribute] = hook.getAttribute("data-" + attribute);
     }
 
-    Reactions.webmaster.init(function () {
-      Reactions.customer.init(function () {
-        Reactions.product.init(function () {});
+    Kaanjo.webmaster.init(function () {
+      Kaanjo.customer.init(function () {
+        Kaanjo.product.init(function () {});
       });
     });
   },
@@ -177,31 +177,31 @@ var Reactions = {
 
   webmaster: {
     init: function init(cb) {
-      Reactions.request('webmaster.find', {
-        website: window.location.host
+      Kaanjo.request('webmaster.find', {
+        key: Kaanjo.attributes['key']
       }, function (success) {
-        console.log("Found webmaster for: " + window.location.host);
+        console.log("Found webmaster");
         cb();
       }, function (fail) {
-        console.log("Failed to find webmaster for current host: " + window.location.host);
+        console.log("Failed to find webmaster");
       });
     }
   },
 
   customer: {
     init: function init(cb) {
-      Reactions.customer.id = Reactions.cookies.get('reactions_sid');
-      if (!Reactions.customer.id) {
-        Reactions.request('customer.create', {}, function (success) {
-          Reactions.customer.id = success.sid;
-          Reactions.cookies.set('reactions_sid', success.sid);
+      Kaanjo.customer.id = Kaanjo.cookies.get('reactions_sid');
+      if (!Kaanjo.customer.id) {
+        Kaanjo.request('customer.create', {}, function (success) {
+          Kaanjo.customer.id = success.sid;
+          Kaanjo.cookies.set('reactions_sid', success.sid);
           console.log("Created customer with ID: " + success.id);
           cb();
         }, function (fail) {
           console.log("Failed to create customer: " + fail.error);
         });
       } else {
-        console.log("Found cookie for customer: " + Reactions.customer.id);
+        console.log("Found cookie for customer: " + Kaanjo.customer.id);
         cb();
       }
     }
@@ -209,23 +209,22 @@ var Reactions = {
 
   product: {
     init: function init(cb) {
-      Reactions.request('product.find', {
-        product_name: Reactions.attributes.name,
-        customer_id: Reactions.customer.id
+      Kaanjo.request('product.find', {
+        product: Kaanjo.attributes.product,
+        customer_id: Kaanjo.customer.id
       }, function (success) {
-        Reactions.product.data = success.data;
-        console.log("Found product: " + Reactions.attributes.name);
-        console.log(success.data);
+        Kaanjo.product.data = success.data;
+        console.log("Found product: " + Kaanjo.attributes.product);
         cb();
       }, function (fail) {
-        console.log("Failed to find product: " + Reactions.attributes.name);
+        console.log("Failed to find product: " + Kaanjo.attributes.product);
       });
     }
   },
 
   ui: {
     render: function render() {
-      return '<button type="button" onclick="Reactions.send(\'Reaction 1\');">Reaction 1</button> &nbsp; <button type="button" onclick="Reactions.send(\'Reaction 2\');">Reaction 2</button>';
+      return '<button type="button" onclick="Kaanjo.send(\'Reaction 1\');">Reaction 1</button> &nbsp; <button type="button" onclick="Kaanjo.send(\'Reaction 2\');">Reaction 2</button>';
     }
   },
 
@@ -236,20 +235,20 @@ var Reactions = {
   },
   socket: new WebSocketRails('localhost:3000/websocket'),
   request: function request(action, data, success, fail) {
-    Reactions.socket.trigger(action, data, success, fail);
+    Kaanjo.socket.trigger(action, data, success, fail);
   },
   valid: function valid(hook) {
 
     var is_valid = true;
 
-    if (hook.length < 1) {
+    if (hook == null) {
       is_valid = false;
     } else {
 
-      for (var attribute in Reactions.attributes) {
+      for (var attribute in Kaanjo.attributes) {
 
         if (!hook.hasAttribute("data-" + attribute)) {
-          console.error("Reactions error: You are missing the '" + attribute + "' attribute in your HTML.");
+          console.error("Kaanjo error: You are missing the '" + attribute + "' attribute in your HTML.");
           is_valid = false;
         }
       }
@@ -260,7 +259,8 @@ var Reactions = {
 
 
   attributes: {
-    name: null
+    key: null,
+    product: null
   }
 
 };
