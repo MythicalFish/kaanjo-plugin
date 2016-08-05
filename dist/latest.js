@@ -152,7 +152,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   Kaanjo.socket.on_open = function (data) {
     console.log("Connection established: " + data.connection_id);
-    Kaanjo.init();
+    setTimeout(function () {
+      Kaanjo.init();
+    }, 500);
   };
 });
 
@@ -169,6 +171,7 @@ var Kaanjo = {
 
     Kaanjo.webmaster.init(function () {
       Kaanjo.customer.init(function () {
+        Kaanjo.request('customer.impress');
         Kaanjo.product.init(function () {});
       });
     });
@@ -190,12 +193,12 @@ var Kaanjo = {
 
   customer: {
     init: function init(cb) {
-      Kaanjo.customer.id = Kaanjo.cookies.get('reactions_sid');
+      Kaanjo.customer.id = Kaanjo.cookies.get('kaanjo_cid');
       if (!Kaanjo.customer.id) {
         Kaanjo.request('customer.create', {}, function (success) {
           Kaanjo.customer.id = success.sid;
-          Kaanjo.cookies.set('reactions_sid', success.sid);
-          console.log("Created customer with ID: " + success.id);
+          Kaanjo.cookies.set('kaanjo_cid', success.sid);
+          console.log("Created customer with ID: " + success.sid);
           cb();
         }, function (fail) {
           console.log("Failed to create customer: " + fail.error);
@@ -230,9 +233,6 @@ var Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
-  track: {
-    impression: function impression() {}
-  },
   socket: new WebSocketRails('localhost:3000/websocket'),
   request: function request(action, data, success, fail) {
     Kaanjo.socket.trigger(action, data, success, fail);

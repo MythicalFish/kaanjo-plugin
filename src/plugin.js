@@ -2,7 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   
   Kaanjo.socket.on_open = function(data) {
     console.log(`Connection established: ${data.connection_id}`)
-    Kaanjo.init()
+    setTimeout(() => { 
+      Kaanjo.init()
+    },500);
   }
 
 });
@@ -22,6 +24,7 @@ const Kaanjo = {
 
     Kaanjo.webmaster.init(() => {
       Kaanjo.customer.init(() => {
+        Kaanjo.request('customer.impress')
         Kaanjo.product.init(() => {
 
         })
@@ -48,13 +51,13 @@ const Kaanjo = {
 
   customer: {
     init(cb) {
-      Kaanjo.customer.id = Kaanjo.cookies.get('reactions_sid');
+      Kaanjo.customer.id = Kaanjo.cookies.get('kaanjo_cid');
       if(!Kaanjo.customer.id) {
         Kaanjo.request( 'customer.create', {}, 
           (success) => { 
             Kaanjo.customer.id = success.sid;
-            Kaanjo.cookies.set('reactions_sid', success.sid);
-            console.log(`Created customer with ID: ${success.id}`)
+            Kaanjo.cookies.set('kaanjo_cid', success.sid);
+            console.log(`Created customer with ID: ${success.sid}`)
             cb();
           }, 
           (fail) => { console.log(`Failed to create customer: ${fail.error}`); }
@@ -90,11 +93,6 @@ const Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
-  track: {
-    impression() {
-
-    }
-  },
   socket: new WebSocketRails('localhost:3000/websocket'),
   request(action,data,success,fail) {
     Kaanjo.socket.trigger(action,data,success,fail)
