@@ -82,11 +82,15 @@ const Kaanjo = {
     init(cb) {
       Kaanjo.request( 'product.find', {
         product: Kaanjo.attributes.product,
-        customer_id: Kaanjo.customer.id
+        url: window.location.href
       }, 
         (success) => {
           Kaanjo.product.data = success.data;
-          console.log(`Found product: ${Kaanjo.attributes.product}`)
+          if(success.created) {
+            console.log(`Created product: ${Kaanjo.attributes.product}`)
+          } else {
+            console.log(`Found product: ${Kaanjo.attributes.product}`)
+          }
           cb();
         }, 
         (fail) => { console.log(`Failed to find product: ${Kaanjo.attributes.product}`) }
@@ -102,6 +106,7 @@ const Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
+  //socket: new WebSocketRails('kaanjo.com/websocket'),
   socket: new WebSocketRails('localhost:3000/websocket'),
   request(action,data,success,fail) {
     Kaanjo.socket.trigger(action,data,success,fail)
