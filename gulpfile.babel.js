@@ -30,9 +30,9 @@ gulp.task('js', function() {
         'src/websocket_rails.0.0.1.min.js'
       ]
     }))
-    .pipe(concat('latest.js'))
     .pipe(gulpif(isProduction,uglify({ mangle: true })))
-    .pipe(sourcemaps.write("."))
+    .pipe(concat('latest.js'))
+    .pipe(gulpif(!isProduction,sourcemaps.write(".")))
     .pipe(gulp.dest('dist'))
     .pipe(livereload());
 
