@@ -13,13 +13,13 @@ const Kaanjo = {
 
   init() {
     
-    let hook = document.getElementById("kaanjo");
+    Kaanjo.hook = document.getElementById("kaanjo");
 
-    if(!Kaanjo.valid(hook))
+    if(!Kaanjo.valid(Kaanjo.hook))
       return false
 
     for(const attribute in Kaanjo.attributes) {
-      Kaanjo.attributes[attribute] = hook.getAttribute(`data-${attribute}`);
+      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute(`data-${attribute}`);
     }
 
     Kaanjo.webmaster.init(() => {
@@ -29,6 +29,7 @@ const Kaanjo = {
             device: detectBrowser(navigator.userAgent).name
           },(success) => {
             console.log(success.msg)
+            Kaanjo.hook.innerHTML = Kaanjo.html()
           })
         })
       })
@@ -82,20 +83,19 @@ const Kaanjo = {
         product: Kaanjo.attributes.product,
         url: window.location.href
       }, 
-        (success) => {
-          Kaanjo.product.data = success.data
-          console.log(success.msg)
-          cb();
-        }, 
-        (fail) => { console.log(fail.msg) }
-      );
+      (success) => {
+        Kaanjo.product.data = success.data
+        console.log(success.msg)
+        cb();
+      }, 
+      (fail) => { 
+        console.log(failure.msg) 
+      })
     }
   },
 
-  ui: {
-    render() {
-      return '<button type="button" onclick="Kaanjo.send(\'Reaction 1\');">Reaction 1</button> &nbsp; <button type="button" onclick="Kaanjo.send(\'Reaction 2\');">Reaction 2</button>';
-    }
+  html() {
+    Kaanjo.request('product.get_html')
   },
 
   cookies: Cookies.noConflict(),

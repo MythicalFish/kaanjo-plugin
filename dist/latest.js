@@ -196,12 +196,12 @@ document.addEventListener("DOMContentLoaded", function () {
 var Kaanjo = {
   init: function init() {
 
-    var hook = document.getElementById("kaanjo");
+    Kaanjo.hook = document.getElementById("kaanjo");
 
-    if (!Kaanjo.valid(hook)) return false;
+    if (!Kaanjo.valid(Kaanjo.hook)) return false;
 
     for (var attribute in Kaanjo.attributes) {
-      Kaanjo.attributes[attribute] = hook.getAttribute("data-" + attribute);
+      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute("data-" + attribute);
     }
 
     Kaanjo.webmaster.init(function () {
@@ -211,6 +211,7 @@ var Kaanjo = {
             device: detectBrowser(navigator.userAgent).name
           }, function (success) {
             console.log(success.msg);
+            Kaanjo.hook.innerHTML = Kaanjo.html();
           });
         });
       });
@@ -262,16 +263,15 @@ var Kaanjo = {
         console.log(success.msg);
         cb();
       }, function (fail) {
-        console.log(fail.msg);
+        console.log(failure.msg);
       });
     }
   },
 
-  ui: {
-    render: function render() {
-      return '<button type="button" onclick="Kaanjo.send(\'Reaction 1\');">Reaction 1</button> &nbsp; <button type="button" onclick="Kaanjo.send(\'Reaction 2\');">Reaction 2</button>';
-    }
+  html: function html() {
+    Kaanjo.request('product.get_html');
   },
+
 
   cookies: Cookies.noConflict(),
 
