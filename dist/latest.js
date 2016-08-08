@@ -211,7 +211,7 @@ var Kaanjo = {
             device: detectBrowser(navigator.userAgent).name
           }, function (success) {
             console.log(success.msg);
-            Kaanjo.hook.innerHTML = Kaanjo.html();
+            Kaanjo.get_html();
           });
         });
       });
@@ -268,8 +268,10 @@ var Kaanjo = {
     }
   },
 
-  html: function html() {
-    Kaanjo.request('product.get_html');
+  get_html: function get_html() {
+    Kaanjo.request('product.get_html', {}, function (html) {
+      Kaanjo.hook.innerHTML = html.msg;
+    });
   },
 
 
@@ -291,7 +293,7 @@ var Kaanjo = {
       for (var attribute in Kaanjo.attributes) {
 
         if (!hook.hasAttribute("data-" + attribute)) {
-          console.error("Kaanjo error: You are missing the '" + attribute + "' attribute in your HTML.");
+          console.error("Kaanjo: You are missing the '" + attribute + "' attribute in your HTML.");
           is_valid = false;
         }
       }
