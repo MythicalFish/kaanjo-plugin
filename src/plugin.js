@@ -11,8 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const Kaanjo = {
 
-  api_url: 'localhost:3000/websocket',
-
   init() {
     
     Kaanjo.hook = document.getElementById("kaanjo");
@@ -105,7 +103,8 @@ const Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
-  socket: new WebSocketRails('localhost:3000/websocket'),
+  //socket: new WebSocketRails('localhost:3000/websocket'),
+  socket: new WebSocketRails('kaanjo.co/websocket'),
 
   request(action,data,success,fail) {
     Kaanjo.socket.trigger(action,data,success,fail)
