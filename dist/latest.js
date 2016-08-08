@@ -194,6 +194,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 var Kaanjo = {
+
+  api_url: 'localhost:3000/websocket',
+
   init: function init() {
 
     Kaanjo.hook = document.getElementById("kaanjo");
@@ -263,7 +266,7 @@ var Kaanjo = {
         console.log(success.msg);
         cb();
       }, function (fail) {
-        console.log(failure.msg);
+        console.log(fail.msg);
       });
     }
   },
@@ -277,10 +280,15 @@ var Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
-  //socket: new WebSocketRails('kaanjo.com/websocket'),
   socket: new WebSocketRails('localhost:3000/websocket'),
+
   request: function request(action, data, success, fail) {
     Kaanjo.socket.trigger(action, data, success, fail);
+  },
+  react: function react(reaction_id) {
+    Kaanjo.request('customer.react', {
+      id: reaction_id
+    });
   },
   valid: function valid(hook) {
 
