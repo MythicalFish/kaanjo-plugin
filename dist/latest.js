@@ -210,7 +210,7 @@ var Kaanjo = {
           Kaanjo.request('customer.impress', {
             device: detectBrowser(navigator.userAgent).name
           }, function (success) {
-            console.log('Recorded impression');
+            console.log(success.msg);
           });
         });
       });
@@ -223,36 +223,32 @@ var Kaanjo = {
       Kaanjo.request('webmaster.find', {
         key: Kaanjo.attributes['key']
       }, function (success) {
-        console.log("Found webmaster");
+        console.log(success.msg);
         cb();
       }, function (fail) {
-        console.log("Failed to find webmaster");
+        console.log(fail.msg);
       });
     }
   },
 
   customer: {
     init: function init(cb) {
+
+      params = { id: null };
+
       Kaanjo.customer.id = Kaanjo.cookies.get('kaanjo_cid');
-      if (!Kaanjo.customer.id) {
-        Kaanjo.request('customer.create', {}, function (success) {
-          Kaanjo.customer.id = success.sid;
-          Kaanjo.cookies.set('kaanjo_cid', success.sid);
-          console.log("Created customer with ID: " + success.sid);
-          cb();
-        }, function (fail) {
-          console.log("Failed to create customer: " + fail.error);
-        });
-      } else {
-        Kaanjo.request('customer.find', {
-          id: Kaanjo.customer.id
-        }, function (success) {
-          console.log("Found & initialized cookie for customer: " + Kaanjo.customer.id);
-          cb();
-        }, function (fail) {
-          console.log("Failed to initialize customer: " + Kaanjo.customer.id);
-        });
+      if (Kaanjo.customer.id) {
+        params.id = Kaanjo.customer.id;
       }
+
+      Kaanjo.request('customer.find', params, function (success) {
+        Kaanjo.cookies.set('kaanjo_cid', success.sid);
+        Kaanjo.customer.id = success.sid;
+        console.log(success.msg);
+        cb();
+      }, function (fail) {
+        console.log(fail.msg);
+      });
     }
   },
 
@@ -263,14 +259,10 @@ var Kaanjo = {
         url: window.location.href
       }, function (success) {
         Kaanjo.product.data = success.data;
-        if (success.created) {
-          console.log("Created product: " + Kaanjo.attributes.product);
-        } else {
-          console.log("Found product: " + Kaanjo.attributes.product);
-        }
+        console.log(success.msg);
         cb();
       }, function (fail) {
-        console.log("Failed to find product: " + Kaanjo.attributes.product);
+        console.log(fail.msg);
       });
     }
   },
@@ -315,4 +307,8 @@ var Kaanjo = {
   }
 
 };
+
+function cl(msg) {
+  console.log(msg);
+}
 //# sourceMappingURL=latest.js.map

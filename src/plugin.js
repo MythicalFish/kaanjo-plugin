@@ -27,7 +27,9 @@ const Kaanjo = {
         Kaanjo.product.init(() => {
           Kaanjo.request('customer.impress', {
             device: detectBrowser(navigator.userAgent).name
-          },(success) => {console.log('Recorded impression')})
+          },(success) => {
+            console.log(success.msg)
+          })
         })
       })
     })
@@ -42,39 +44,35 @@ const Kaanjo = {
           key: Kaanjo.attributes['key']
         }, 
         (success) => { 
-          console.log(`Found webmaster`)
+          console.log(success.msg)
           cb();
         }, 
-        (fail) => { console.log(`Failed to find webmaster`); }
+        (fail) => { console.log(fail.msg); }
       );
     }
   },
 
   customer: {
     init(cb) {
-      Kaanjo.customer.id = Kaanjo.cookies.get('kaanjo_cid');
-      if(!Kaanjo.customer.id) {
-        Kaanjo.request( 'customer.create', {}, 
-          (success) => { 
-            Kaanjo.customer.id = success.sid;
-            Kaanjo.cookies.set('kaanjo_cid', success.sid);
-            console.log(`Created customer with ID: ${success.sid}`)
-            cb();
-          }, 
-          (fail) => { console.log(`Failed to create customer: ${fail.error}`); }
-        );
-      } else {
-        Kaanjo.request( 'customer.find', {
-          id: Kaanjo.customer.id
-        },
-        (success) => {
-          console.log(`Found & initialized cookie for customer: ${Kaanjo.customer.id}`)
-          cb()
-        },
-        (fail) => {
-          console.log(`Failed to initialize customer: ${Kaanjo.customer.id}`)
-        })
+      
+      params = { id: null }
+
+      Kaanjo.customer.id = Kaanjo.cookies.get('kaanjo_cid')
+      if(Kaanjo.customer.id) {
+        params.id = Kaanjo.customer.id
       }
+
+      Kaanjo.request( 'customer.find', params,
+      (success) => {
+        Kaanjo.cookies.set('kaanjo_cid', success.sid);
+        Kaanjo.customer.id = success.sid;
+        console.log(success.msg)
+        cb()
+      },
+      (fail) => {
+        console.log(fail.msg)
+      })
+
     }
   },
 
@@ -85,15 +83,11 @@ const Kaanjo = {
         url: window.location.href
       }, 
         (success) => {
-          Kaanjo.product.data = success.data;
-          if(success.created) {
-            console.log(`Created product: ${Kaanjo.attributes.product}`)
-          } else {
-            console.log(`Found product: ${Kaanjo.attributes.product}`)
-          }
+          Kaanjo.product.data = success.data
+          console.log(success.msg)
           cb();
         }, 
-        (fail) => { console.log(`Failed to find product: ${Kaanjo.attributes.product}`) }
+        (fail) => { console.log(fail.msg) }
       );
     }
   },
@@ -140,4 +134,8 @@ const Kaanjo = {
     product: null
   }
 
+}
+
+function cl(msg) {
+  console.log(msg)
 }
