@@ -1,101 +1,40 @@
-document.addEventListener("DOMContentLoaded", () => { 
-  
-  Kaanjo.socket.on_open = function(data) {
-    console.log(`Connection established: ${data.connection_id}`)
-    setTimeout(() => { 
-      Kaanjo.init()
-    },500);
-  }
-
-});
-
 const Kaanjo = {
+
+  socket: new WebSocketRails('localhost:3000/websocket'),
+  //socket: new WebSocketRails('kaanjo.co/websocket'),
 
   init() {
     
-    Kaanjo.hook = document.getElementById("kaanjo");
+    Kaanjo.hook = document.getElementById("kaanjo")
 
     if(!Kaanjo.valid(Kaanjo.hook))
       return false
 
     for(const attribute in Kaanjo.attributes) {
-      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute(`data-${attribute}`);
+      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute(`data-${attribute}`)
     }
 
-    Kaanjo.webmaster.init(() => {
-      Kaanjo.customer.init(() => {
-        Kaanjo.product.init(() => {
-          Kaanjo.request('customer.impress', {
-            device: detectBrowser(navigator.userAgent).name
-          },(success) => {
-            console.log(success.msg)
-            Kaanjo.get_html()
-          })
-        })
-      })
-    })
-    
-
-  },
-
-  webmaster: {
-    init(cb) {
-      Kaanjo.request( 'webmaster.find', 
-        {
-          key: Kaanjo.attributes['key']
-        }, 
-        (success) => { 
-          console.log(success.msg)
-          cb();
-        }, 
-        (fail) => { console.log(fail.msg); }
-      );
-    }
-  },
-
-  customer: {
-    init(cb) {
-      
-      params = { id: null }
-
-      Kaanjo.customer.id = Kaanjo.cookies.get('kaanjo_cid')
-      if(Kaanjo.customer.id) {
-        params.id = Kaanjo.customer.id
-      }
-
-      Kaanjo.request( 'customer.find', params,
-      (success) => {
-        Kaanjo.cookies.set('kaanjo_cid', success.sid);
-        Kaanjo.customer.id = success.sid;
-        console.log(success.msg)
-        cb()
-      },
-      (fail) => {
-        console.log(fail.msg)
-      })
-
-    }
-  },
-
-  product: {
-    init(cb) {
-      Kaanjo.request( 'product.find', {
-        product: Kaanjo.attributes.product,
-        url: window.location.href
+    Kaanjo.request( 'init', 
+      {
+        wid:    Kaanjo.attributes['key'],
+        cid:    Kaanjo.cookies.get('kaanjo_cid'),
+        pid:    Kaanjo.attributes.product,
+        url:    window.location.href,
+        device: detectBrowser(navigator.userAgent).name
       }, 
       (success) => {
-        Kaanjo.product.data = success.data
         console.log(success.msg)
-        cb();
+        if(success.cid)
+          Kaanjo.cookies.set('kaanjo_cid', success.cid)
+        Kaanjo.get_html()
       }, 
-      (fail) => { 
-        console.log(fail.msg) 
-      })
-    }
+      (fail) => { console.log(fail.msg) }
+    )   
+
   },
 
   get_html() {
-    Kaanjo.request('product.get_html',{},
+    Kaanjo.request('html',{},
     (html) => {
       Kaanjo.hook.innerHTML = html.msg
     })
@@ -103,25 +42,28 @@ const Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
-  //socket: new WebSocketRails('localhost:3000/websocket'),
-  socket: new WebSocketRails('kaanjo.co/websocket'),
-
   request(action,data,success,fail) {
     Kaanjo.socket.trigger(action,data,success,fail)
   },
 
   react(reaction_id) {
-    Kaanjo.request('customer.react',{
+    Kaanjo.request('react',{
       id: reaction_id
+    },
+    (success) => {
+      console.log(success.msg)
+    },
+    (fail) => {
+      console.log(fail.msg)
     })
   },
 
   valid(hook) {
 
-    let is_valid = true;
+    let is_valid = true
 
     if(hook == null) {
-      is_valid = false;
+      is_valid = false
 
     } else {
 
@@ -129,13 +71,13 @@ const Kaanjo = {
 
         if(!hook.hasAttribute(`data-${attribute}`)) {
           console.error(`Kaanjo: You are missing the '${attribute}' attribute in your HTML.`)
-          is_valid = false;
+          is_valid = false
         } 
 
       }
     }
 
-    return is_valid;
+    return is_valid
 
   },
 
@@ -146,6 +88,9 @@ const Kaanjo = {
 
 }
 
-function cl(msg) {
-  console.log(msg)
+Kaanjo.socket.on_open = function(data) {
+  console.log(`Connection established: ${data.connection_id}`)
+  setTimeout(() => { 
+    Kaanjo.init()
+  },500)
 }

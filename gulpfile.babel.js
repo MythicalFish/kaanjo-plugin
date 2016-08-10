@@ -31,9 +31,9 @@ gulp.task('js', function() {
       ]
     }))
     .pipe(gulpif(isProduction,uglify({ mangle: true })))
-    .pipe(concat('latest.js'))
+    .pipe(concat('plugin.js'))
     .pipe(gulpif(!isProduction,sourcemaps.write(".")))
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest('../reactions-admin/public'))
     .pipe(livereload());
 
 });

@@ -181,17 +181,7 @@ function detectBrowser(userAgentString) {
     version: parts && parts.join('.')
   };
 };
-"use strict";
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  Kaanjo.socket.on_open = function (data) {
-    console.log("Connection established: " + data.connection_id);
-    setTimeout(function () {
-      Kaanjo.init();
-    }, 500);
-  };
-});
+'use strict';
 
 var Kaanjo = {
   init: function init() {
@@ -201,7 +191,7 @@ var Kaanjo = {
     if (!Kaanjo.valid(Kaanjo.hook)) return false;
 
     for (var attribute in Kaanjo.attributes) {
-      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute("data-" + attribute);
+      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute('data-' + attribute);
     }
 
     Kaanjo.webmaster.init(function () {
@@ -277,8 +267,8 @@ var Kaanjo = {
 
   cookies: Cookies.noConflict(),
 
-  //socket: new WebSocketRails('localhost:3000/websocket'),
-  socket: new WebSocketRails('kaanjo.co/websocket'),
+  socket: new WebSocketRails('localhost:3000/websocket'),
+  //socket: new WebSocketRails('kaanjo.co/websocket'),
 
   request: function request(action, data, success, fail) {
     Kaanjo.socket.trigger(action, data, success, fail);
@@ -298,8 +288,8 @@ var Kaanjo = {
 
       for (var attribute in Kaanjo.attributes) {
 
-        if (!hook.hasAttribute("data-" + attribute)) {
-          console.error("Kaanjo: You are missing the '" + attribute + "' attribute in your HTML.");
+        if (!hook.hasAttribute('data-' + attribute)) {
+          console.error('Kaanjo: You are missing the \'' + attribute + '\' attribute in your HTML.');
           is_valid = false;
         }
       }
@@ -316,7 +306,10 @@ var Kaanjo = {
 
 };
 
-function cl(msg) {
-  console.log(msg);
-}
+Kaanjo.socket.on_open = function (data) {
+  console.log('Connection established: ' + data.connection_id);
+  setTimeout(function () {
+    Kaanjo.init();
+  }, 500);
+};
 //# sourceMappingURL=latest.js.map
