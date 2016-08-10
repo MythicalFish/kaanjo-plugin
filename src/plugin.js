@@ -16,34 +16,22 @@ const Kaanjo = {
 
     Kaanjo.request( 'init', 
       {
-        wid:    Kaanjo.attributes['key'],
-        cid:    Kaanjo.cookies.get('kaanjo_cid'),
+        wid:    Kaanjo.attributes.key,
         pid:    Kaanjo.attributes.product,
+        cid:    Kaanjo.cookies.get('kaanjo_cid'),
         url:    window.location.href,
         device: detectBrowser(navigator.userAgent).name
       }, 
       (success) => {
-        console.log(success.msg)
+        Kaanjo.log('Kaanjo initialized')
+        Kaanjo.log(success.msg)
         if(success.cid)
           Kaanjo.cookies.set('kaanjo_cid', success.cid)
         Kaanjo.get_html()
       }, 
-      (fail) => { console.log(fail.msg) }
+      (fail) => { Kaanjo.log(fail.msg) }
     )   
 
-  },
-
-  get_html() {
-    Kaanjo.request('html',{},
-    (html) => {
-      Kaanjo.hook.innerHTML = html.msg
-    })
-  },
-
-  cookies: Cookies.noConflict(),
-
-  request(action,data,success,fail) {
-    Kaanjo.socket.trigger(action,data,success,fail)
   },
 
   react(reaction_id) {
@@ -51,11 +39,34 @@ const Kaanjo = {
       id: reaction_id
     },
     (success) => {
-      console.log(success.msg)
+      Kaanjo.log(success.msg)
+      Kaanjo.select(reaction_id)
     },
     (fail) => {
-      console.log(fail.msg)
+      Kaanjo.log(fail.msg)
     })
+  },
+
+  select(id) {
+    let buttons = document.getElementsByClassName('kaanjo-reaction')
+    for(let button of buttons) {
+      button.classList.remove('kaanjo-selected')
+    }
+    e = document.getElementById(`kaanjo-reaction${id}`)
+    e.classList.add('kaanjo-selected')
+  },
+
+  get_html() {
+    Kaanjo.request('html',{},
+    (html) => {
+      Kaanjo.hook.innerHTML = html
+    })
+  },
+
+  cookies: Cookies.noConflict(),
+
+  request(action,data,success,fail) {
+    Kaanjo.socket.trigger(action,data,success,fail)
   },
 
   valid(hook) {
@@ -84,12 +95,15 @@ const Kaanjo = {
   attributes: {
     key: null,
     product: null
+  },
+
+  log(msg) {
+    if(msg) console.log(msg)
   }
 
 }
 
 Kaanjo.socket.on_open = function(data) {
-  console.log(`Connection established: ${data.connection_id}`)
   setTimeout(() => { 
     Kaanjo.init()
   },500)
