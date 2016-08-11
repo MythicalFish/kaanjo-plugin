@@ -16,9 +16,9 @@ const Kaanjo = {
 
     Kaanjo.request( 'init', 
       {
-        wid:    Kaanjo.attributes.key,
-        pid:    Kaanjo.attributes.product,
-        cid:    Kaanjo.cookies.get('kaanjo_cid'),
+        w_sid:  Kaanjo.attributes.key,
+        p_sid:  Kaanjo.attributes.product,
+        c_sid:  Kaanjo.cookies.get('kaanjo_cid'),
         url:    window.location.href,
         device: detectBrowser(navigator.userAgent).name
       }, 
