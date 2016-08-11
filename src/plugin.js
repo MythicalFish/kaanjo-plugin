@@ -24,10 +24,11 @@ const Kaanjo = {
       }, 
       (success) => {
         Kaanjo.log('Kaanjo initialized')
-        Kaanjo.log(success.msg)
-        if(success.cid)
-          Kaanjo.cookies.set('kaanjo_cid', success.cid)
-        Kaanjo.get_html()
+        if(success.msg)
+          Kaanjo.log(success.msg)
+        if(success.c_sid)
+          Kaanjo.cookies.set('kaanjo_cid', success.c_sid)
+        Kaanjo.render_buttons()
       }, 
       (fail) => { Kaanjo.log(fail.msg) }
     )   
@@ -54,12 +55,20 @@ const Kaanjo = {
     }
     e = document.getElementById(`kaanjo-reaction${id}`)
     e.classList.add('kaanjo-selected')
+    Kaanjo.render_status()
   },
 
-  get_html() {
-    Kaanjo.request('html',{},
+  render_buttons() {
+    Kaanjo.request('get_buttons',{},
     (html) => {
       Kaanjo.hook.innerHTML = html
+    })
+  },
+
+  render_status() {
+    Kaanjo.request('get_status',{},
+    (html) => {
+      document.getElementById('kaanjo-status').innerHTML = html
     })
   },
 
