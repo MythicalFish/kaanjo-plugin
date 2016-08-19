@@ -31,7 +31,7 @@ gulp.task('js', function() {
       ]
     }))
     .pipe(gulpif(isProduction,uglify({ mangle: true })))
-    .pipe(concat('plugin.js'))
+    .pipe(concat('kaanjo.js'))
     .pipe(gulpif(!isProduction,sourcemaps.write(".")))
     .pipe(gulp.dest('../reactions-admin/public'))
     .pipe(livereload());

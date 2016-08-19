@@ -1,7 +1,7 @@
 const Kaanjo = {
 
-  socket: new WebSocketRails('localhost:3000/websocket'),
-  //socket: new WebSocketRails('kaanjo.co/websocket'),
+  //socket: new WebSocketRails('localhost:3000/websocket'),
+  socket: new WebSocketRails('dashboard.kaanjo.co/websocket'),
 
   init() {
     
@@ -26,8 +26,9 @@ const Kaanjo = {
         Kaanjo.log('Kaanjo initialized')
         if(success.msg)
           Kaanjo.log(success.msg)
-        if(success.c_sid)
+        if(success.c_sid) {
           Kaanjo.cookies.set('kaanjo_cid', success.c_sid)
+        }
         Kaanjo.render_buttons()
       }, 
       (fail) => { Kaanjo.log(fail.msg) }
