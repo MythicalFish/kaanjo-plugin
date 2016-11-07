@@ -33,7 +33,7 @@ gulp.task('js', function() {
     .pipe(gulpif(isProduction,uglify({ mangle: true })))
     .pipe(concat('kaanjo.js'))
     .pipe(gulpif(!isProduction,sourcemaps.write(".")))
-    .pipe(gulp.dest('../reactions-admin/public'))
+    .pipe(gulp.dest('../front'))
     .pipe(livereload());
 
 });

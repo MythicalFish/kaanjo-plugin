@@ -1,22 +1,26 @@
 const Kaanjo = {
 
-  //socket: new WebSocketRails('localhost:3000/websocket'),
-  socket: new WebSocketRails('dashboard.kaanjo.co/websocket'),
+  socket: new WebSocketRails('localhost:3000/websocket'),
+  //socket: new WebSocketRails('dashboard.kaanjo.co/websocket'),
 
   init() {
     
-    Kaanjo.hook = document.getElementById("kaanjo")
+    Kaanjo.script_tag = document.getElementById("kaanjo")
+    Kaanjo.container = document.getElementById("kaanjo-container")
 
-    if(!Kaanjo.valid(Kaanjo.hook))
+    if(!Kaanjo.valid(Kaanjo.container))
       return false
 
     for(const attribute in Kaanjo.attributes) {
-      Kaanjo.attributes[attribute] = Kaanjo.hook.getAttribute(`data-${attribute}`)
+      Kaanjo.attributes[attribute] = Kaanjo.container.getAttribute(`data-${attribute}`)
     }
+
+    Kaanjo.attributes.campaign_id = Kaanjo.script_tag.getAttribute('data-cid');
 
     Kaanjo.request( 'init', 
       {
         w_sid:  Kaanjo.attributes.key,
+        w_cid:  Kaanjo.attributes.campaign_id,
         p_sid:  Kaanjo.attributes.product,
         c_sid:  Kaanjo.cookies.get('kaanjo_cid'),
         url:    window.location.href,
@@ -62,7 +66,7 @@ const Kaanjo = {
   render_buttons() {
     Kaanjo.request('get_buttons',{},
     (html) => {
-      Kaanjo.hook.innerHTML = html
+      Kaanjo.container.innerHTML = html
     })
   },
 
