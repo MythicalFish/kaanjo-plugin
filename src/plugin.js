@@ -53,10 +53,11 @@ Kaanjo.react = function(reaction_id) {
 
 Kaanjo.select = function(id) {
   let buttons = document.getElementsByClassName('kaanjo-reaction')
-  for(let button of buttons) {
+  let arr = []
+  arr.forEach.call(buttons, function (button) {
     button.classList.add('kaanjo-unselected')
-  }
-  e = document.getElementById(`kaanjo-reaction${id}`)
+  });
+  let e = document.getElementById(`kaanjo-reaction${id}`)
   e.classList.remove('kaanjo-unselected')
   Kaanjo.render_status()
 }
